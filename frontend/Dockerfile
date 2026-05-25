@@ -16,8 +16,24 @@ COPY . .
 
 RUN npm run build
 
+
+
 FROM nginx:stable-alpine
 
-RUN rm -rf /usr/share/nginx/html && useradd nginx
+WORKDIR /usr/share/nginx/html
 
+RUN rm -rf ./* && adduser -SDH -g "nginx_group" -s /sbin/nologin nginx_user
 
+COPY --chown=nginx_user:nginx_group ./nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --chown=nginx_user:nginx_group --from=builder /app/dist/ .
+
+RUN chown -R nginx_user:nginx_group /var/run/nginx /var/log/nginx /var/cache/nginx
+
+USER nginx_user
+
+EXPOSE 80
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+
+HEALTHCHECK --interval=20s --start_period=15s --timeout=10s --retries=5 CMD curl -fsI -o /dev/null http://localhost:80/catalog
