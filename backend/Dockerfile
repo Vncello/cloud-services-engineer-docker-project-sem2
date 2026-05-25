@@ -20,12 +20,12 @@ WORKDIR /app
 
 COPY --from=builder /builder/my_app .
 
-RUN adduser -D -g "app" app_user 
+RUN adduser -SDH -g "app" -s /sbin/nologin app_user && chown app_user:app /app/my_app
 
 USER app_user
 
 EXPOSE 8081
 
-CMD ["/app/"]
+CMD ["/app/my_app"]
 
 HEALTCHECK --interval=2s --start_period=10s --timeout=15s --retries=6 
