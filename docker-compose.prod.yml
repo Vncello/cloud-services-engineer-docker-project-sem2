@@ -1,0 +1,91 @@
+version: 3
+
+networks:
+  backend-net:
+    driver: bridge
+    internal: true
+  frontend-net:
+    driver: bridge
+
+volumes:
+    frontendV:
+
+
+services:
+
+  gateway:
+    image: nginxinc/nginx-unprivileged:alpine3.23-perl
+    restart: on-failure
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - frontend-net
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/catalog"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    deploy:
+      recources:
+        limits:
+          cpus: "0.5"
+          memory: 30M
+              
+
+  backend:
+    image: ${DOCKER_USER}/docker-semester-project-back:latest
+    restart: on-failure
+    ports: 
+      - "8081"
+    networks:
+      - backend-net
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    # healthcheck - указан в Dockerfile
+    deploy:
+      recources:
+        limits:
+          cpus: "0.5"
+          memory: 100M
+      replicas: 2
+
+  frontend:
+    image: ${DOCKER_USER}/docker-semester-project-front:latest
+    restart: on-failure
+    ports:
+      - "80"
+    networks:
+      - frontend-net
+      - backend-net
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    deploy:
+      recources:
+        limits:
+          cpus: "0.2"
+          memory: 25M
+      replicas: 2
+      
+    volumes:
+      - frontendV:/var/log/nginx
+
+    depends_on:
+      backend:
+        condition: service_healthy
+              

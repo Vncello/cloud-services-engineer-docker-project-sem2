@@ -28,7 +28,7 @@ COPY --chown=nginx_user:nginx_group ./nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --chown=nginx_user:nginx_group --from=builder /app/dist/ .
 
-RUN chown -R nginx_user:nginx_group /var/run/nginx /var/log/nginx /var/cache/nginx
+RUN touch /var/run/nginx.pid && chown -R nginx_user:nginx_group /var/run/nginx /var/log/nginx /var/cache/nginx /var/run/nginx.pid
 
 USER nginx_user
 
