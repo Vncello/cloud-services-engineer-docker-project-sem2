@@ -87,7 +87,7 @@
 ## Workflow
 Добавлен сканнер уязвимостей образов - `Trivy`.
 Результат сканирования передается через `.sarif`-файлы и доступны по вкладке [Security and quantity](https://github.com/Vncello/cloud-services-engineer-docker-project-sem2/security/code-scanning)
-
+ 
 ## Скриншоты
 
 ![Docker desktop](./Picts/Docker%20desktop.png)
