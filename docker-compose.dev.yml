@@ -47,8 +47,6 @@ services:
   backend:
     build: ./backend
     restart: on-failure
-    ports: 
-      - "8081"
     networks:
       - backend-net
     cap_drop:
@@ -70,8 +68,6 @@ services:
   frontend:
     build: ./frontend
     restart: on-failure
-    ports:
-      - "80"
     networks:
       - frontend-net
       - backend-net

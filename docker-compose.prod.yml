@@ -45,10 +45,8 @@ services:
               
 
   backend:
-    image: ${DOCKER_USER}/docker-semester-project-backend:latest
+    image: ${DOCKER_USER}/docker-project-backend:latest
     restart: on-failure
-    ports: 
-      - "8081"
     networks:
       - backend-net
     cap_drop:
@@ -69,10 +67,8 @@ services:
       replicas: 2
 
   frontend:
-    image: ${DOCKER_USER}/docker-semester-project-backend:latest
+    image: ${DOCKER_USER}/docker-project-frontend:latest
     restart: on-failure
-    ports:
-      - "80"
     networks:
       - frontend-net
       - backend-net

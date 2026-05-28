@@ -6,6 +6,52 @@ on:
       - main
 
 jobs:
+
+  trivy_tests:
+    name: Run trivy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Build Backend
+      run: |
+        docker build -t backend:latest ./backend
+
+    - name: Run Trivy vulnerability scan on backend
+      uses: aquasecurity/trivy-action@0.35.0
+      with:
+        image-ref: 'backend:latest'
+        format: 'sarif'
+        exit-code: 0
+        severity: 'CRITICAL,HIGH, MEDIUM, LOW'
+        output: 'trivy-results-backend.sarif'
+
+    - name: Upload Trivy scan for backend
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+          sarif_file: 'trivy-results-backend.sarif'
+          category: 'trivy-backend-${{ github.job }}'
+
+    - name: Build frontend
+      run: |
+        docker build -t frontend:latest ./frontend
+
+    - name: Run Trivy vulnerability scan on backend
+      uses: aquasecurity/trivy-action@0.35.0
+      with:
+        image-ref: 'frontend:latest'
+        format: 'sarif'
+        exit-code: 0
+        severity: 'CRITICAL,HIGH, MEDIUM, LOW'
+        output: 'trivy-results-frontend.sarif'
+
+    - name: Upload Trivy scan for frontend
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results-frontend.sarif'
+        category: 'trivy-frontend-${{ github.job }}'
+  
   build_and_push_to_docker_hub:
       name: Push Docker image to DockerHub
       runs-on: ubuntu-latest
