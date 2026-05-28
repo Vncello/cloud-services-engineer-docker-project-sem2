@@ -88,6 +88,7 @@
 > Запуск `docker compose -f <docker-compose file> up/down`
 > Запуск gateway на кастомном порту `NGINX_PORT=<my_cool_port> docker compose -f <docker-compose file> up/down`
 
+
 ## Workflow
 Добавлен сканнер уязвимостей образов - `Trivy`.
 Результат сканирования доступен в виде csv-отчетов в артефактах
