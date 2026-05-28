@@ -36,4 +36,4 @@ EXPOSE 80
 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
-HEALTHCHECK --interval=20s --start_period=15s --timeout=10s --retries=5 CMD curl -fsI -o /dev/null http://localhost:80/catalog
+HEALTHCHECK --interval=20s --start-period=15s --timeout=10s --retries=5 CMD curl -fsI -o /dev/null http://localhost:80/catalog
