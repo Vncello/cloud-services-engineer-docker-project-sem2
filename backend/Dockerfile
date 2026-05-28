@@ -6,13 +6,17 @@ ARG CGO_ENABLED=0
 
 WORKDIR /builder
 
-COPY . .
+COPY ./go.mod ./go.sum ./
+
+RUN go mod download
 
 ENV GOOS=$GOOS
 ENV GOARCH=$GOARCH
 ENV CGO_ENABLED=$CGO_ENABLED
 
-RUN go mod download && go build -o my_app .
+COPY ./ ./
+
+RUN go build -o my_app ./cmd/api
 
 
 
@@ -23,8 +27,9 @@ WORKDIR /app
 
 COPY --from=builder /builder/my_app ./my_app
 
-RUN adduser -SDH -g "app" -s /sbin/nologin app_user && \
-    сhown app_user:app ./my_app && \
+RUN addgroup -S "app" && \
+    adduser -SDH -g "app" -s /sbin/nologin app_user && \
+    chown app_user:app ./my_app && \
     chmod u+x,g+x ./my_app
 
 USER app_user
@@ -33,4 +38,4 @@ EXPOSE 8081
 
 CMD ["/app/my_app"]
 
-HEALTHCHECK --interval=2s --start-period=10s --timeout=7s --retries=5 CMD curl -fsI -o /dev/null http://localhost:8081/health
+HEALTHCHECK --interval=45s --start-period=10s --timeout=10s --retries=5 CMD wget --spider -q http://localhost:8081/health/

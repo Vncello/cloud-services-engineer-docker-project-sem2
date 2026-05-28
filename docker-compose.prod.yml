@@ -40,12 +40,12 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: "0.05"
           memory: 30M
               
 
   backend:
-    image: ${DOCKER_USER}/docker-semester-project-back:latest
+    image: ${DOCKER_USER}/docker-semester-project-backend:latest
     restart: on-failure
     ports: 
       - "8081"
@@ -55,16 +55,21 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-    # healthcheck - указан в Dockerfile
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/health"]
+      interval: 45s
+      timeout: 15s
+      retries: 5
+      start_period: 15s
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: "0.05"
           memory: 100M
       replicas: 2
 
   frontend:
-    image: ${DOCKER_USER}/docker-semester-project-front:latest
+    image: ${DOCKER_USER}/docker-semester-project-backend:latest
     restart: on-failure
     ports:
       - "80"
@@ -78,10 +83,16 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.2"
+          cpus: "0.05"
           memory: 25M
       replicas: 2
-      
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/catalog"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
     volumes:
       - frontendV:/var/log/nginx
 
