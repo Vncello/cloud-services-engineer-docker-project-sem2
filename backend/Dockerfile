@@ -33,4 +33,4 @@ EXPOSE 8081
 
 CMD ["/app/my_app"]
 
-HEALTCHECK --interval=2s --start-period=10s --timeout=7s --retries=5 CMD curl -fsI -o /dev/null http://localhost:8081/health
+HEALTHCHECK --interval=2s --start-period=10s --timeout=7s --retries=5 CMD curl -fsI -o /dev/null http://localhost:8081/health
