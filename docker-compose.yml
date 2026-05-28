@@ -46,7 +46,7 @@ services:
           memory: 30M
 
   backend:
-    image: ${DOCKER_USER}/docker-project-backend:latest
+    image: ${DOCKER_USER:-vanchello}/docker-project-backend:latest
     build: ./backend
     restart: on-failure
     networks:
@@ -70,7 +70,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: ${DOCKER_USER}/docker-project-frontend:latest
+    image: ${DOCKER_USER:-vanchello}/docker-project-frontend:latest
     restart: on-failure
     networks:
       - frontend-net
