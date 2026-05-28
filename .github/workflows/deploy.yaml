@@ -7,79 +7,79 @@ on:
 
 jobs:
 
-trivy_tests:
-  name: Run trivy
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+  trivy_tests:
+    name: Run trivy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Build Backend
-      run: |
-        docker build -t backend:latest ./backend
+      - name: Build Backend
+        run: |
+          docker build -t backend:latest ./backend
 
-    - name: Run Trivy vulnerability scan on backend
-      uses: aquasecurity/trivy-action@0.35.0
-      with:
-        image-ref: 'backend:latest'
-        format: 'json'
-        exit-code: 0
-        severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-        output: 'trivy-backend.json'
+      - name: Run Trivy vulnerability scan on backend
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: 'backend:latest'
+          format: 'json'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          output: 'trivy-backend.json'
 
-    - name: Convert Backend JSON to CSV
-      run: |
-        jq -r '
-          def severity_order: {"CRITICAL":0, "HIGH":1, "MEDIUM":2, "LOW":3, "UNKNOWN":4};
-          ["Vulnerability ID", "Severity", "Package Name", "Installed Version", "Fixed Version", "Title"],
-          ([
-            .Results[]?.Vulnerabilities[]? |
-            {VulnerabilityID: .VulnerabilityID, Severity: .Severity, PkgName: .PkgName, InstalledVersion: .InstalledVersion, FixedVersion: .FixedVersion, Title: .Title}
-          ] | sort_by(.Severity | severity_order[.])[] | [
-            .VulnerabilityID, .Severity, .PkgName, .InstalledVersion, .FixedVersion, .Title
-          ])
-          | @csv' trivy-backend.json > trivy-backend.csv
+      - name: Convert Backend JSON to CSV
+        run: |
+          jq -r '
+            def severity_order: {"CRITICAL":0, "HIGH":1, "MEDIUM":2, "LOW":3, "UNKNOWN":4};
+            ["Vulnerability ID", "Severity", "Package Name", "Installed Version", "Fixed Version", "Title"],
+            ([
+              .Results[]?.Vulnerabilities[]? |
+              {VulnerabilityID: .VulnerabilityID, Severity: .Severity, PkgName: .PkgName, InstalledVersion: .InstalledVersion, FixedVersion: .FixedVersion, Title: .Title}
+            ] | sort_by(.Severity | severity_order[.])[] | [
+              .VulnerabilityID, .Severity, .PkgName, .InstalledVersion, .FixedVersion, .Title
+            ])
+            | @csv' trivy-backend.json > trivy-backend.csv
 
-    - name: Build frontend
-      run: |
-        docker build -t frontend:latest ./frontend
+      - name: Build frontend
+        run: |
+          docker build -t frontend:latest ./frontend
 
-    - name: Run Trivy vulnerability scan on frontend
-      uses: aquasecurity/trivy-action@0.35.0
-      with:
-        image-ref: 'frontend:latest'
-        format: 'json'
-        exit-code: 0
-        severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-        output: 'trivy-frontend.json'
+      - name: Run Trivy vulnerability scan on frontend
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: 'frontend:latest'
+          format: 'json'
+          exit-code: 0
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          output: 'trivy-frontend.json'
 
-    - name: Convert Frontend JSON to CSV
-      run: |
-        jq -r '
-          def severity_order: {"CRITICAL":0, "HIGH":1, "MEDIUM":2, "LOW":3, "UNKNOWN":4};
-          ["Vulnerability ID", "Severity", "Package Name", "Installed Version", "Fixed Version", "Title"],
-          ([
-            .Results[]?.Vulnerabilities[]? |
-            {VulnerabilityID: .VulnerabilityID, Severity: .Severity, PkgName: .PkgName, InstalledVersion: .InstalledVersion, FixedVersion: .FixedVersion, Title: .Title}
-          ] | sort_by(.Severity | severity_order[.])[] | [
-            .VulnerabilityID, .Severity, .PkgName, .InstalledVersion, .FixedVersion, .Title
-          ])
-          | @csv' trivy-frontend.json > trivy-frontend.csv
+      - name: Convert Frontend JSON to CSV
+        run: |
+          jq -r '
+            def severity_order: {"CRITICAL":0, "HIGH":1, "MEDIUM":2, "LOW":3, "UNKNOWN":4};
+            ["Vulnerability ID", "Severity", "Package Name", "Installed Version", "Fixed Version", "Title"],
+            ([
+              .Results[]?.Vulnerabilities[]? |
+              {VulnerabilityID: .VulnerabilityID, Severity: .Severity, PkgName: .PkgName, InstalledVersion: .InstalledVersion, FixedVersion: .FixedVersion, Title: .Title}
+            ] | sort_by(.Severity | severity_order[.])[] | [
+              .VulnerabilityID, .Severity, .PkgName, .InstalledVersion, .FixedVersion, .Title
+            ])
+            | @csv' trivy-frontend.json > trivy-frontend.csv
 
-    - name: Upload Backend reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-backend-reports
-        path: |
-          trivy-backend.csv
+      - name: Upload Backend reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-backend-reports
+          path: |
+            trivy-backend.csv
 
-    - name: Upload Frontend reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-frontend-reports
-        path: |
-          trivy-frontend.csv
-          
+      - name: Upload Frontend reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-frontend-reports
+          path: |
+            trivy-frontend.csv
+
   build_and_push_to_docker_hub:
       name: Push Docker image to DockerHub
       runs-on: ubuntu-latest
