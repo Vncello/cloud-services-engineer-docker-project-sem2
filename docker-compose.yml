@@ -8,7 +8,8 @@ networks:
     driver: bridge
 
 volumes:
-    frontendV:
+    nginx-log:
+      driver: local
 
 
 services:
@@ -42,9 +43,12 @@ services:
         limits:
           cpus: "0.05"
           memory: 30M
+    volumes:
+      - nginx-log:/var/log/nginx
               
 
   backend:
+    image: ${DOCKER_USER}/docker-project-backend:latest
     build: ./backend
     restart: on-failure
     networks:
@@ -68,6 +72,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: ${DOCKER_USER}/docker-project-frontend:latest
     restart: on-failure
     networks:
       - frontend-net
@@ -89,8 +94,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 15s
-    volumes:
-      - frontendV:/var/log/nginx
 
     depends_on:
       backend:
